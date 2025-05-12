@@ -1,0 +1,9 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/mysql-connector-java-8.0.28.jar",
+        "test-lib/**/*.jar"
+    ],
+    "cSpell.words": [
+        "jdbc"
+    ]
+}
