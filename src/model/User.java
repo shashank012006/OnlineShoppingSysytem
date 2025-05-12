@@ -1,6 +1,7 @@
 package model;
 
 public class User {
+    // Fields
     private int userId;
     private String username;
     private String password;
@@ -8,10 +9,7 @@ public class User {
     private String address;
     private String phone;
 
-    // Constructors, getters, and setters
-    public User() {
-    }
-
+    // Constructor
     public User(String username, String password, String email, String address, String phone) {
         this.username = username;
         this.password = password;
@@ -20,61 +18,57 @@ public class User {
         this.phone = phone;
     }
 
+    public User() {
+        // Default constructor
+    }
+
+    // Getters
+    public int getUserId() {
+        return userId;
+    }
+
     public String getUsername() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUsername'");
+        return username;
     }
 
     public String getPassword() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPassword'");
+        return password;
     }
 
     public String getEmail() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getEmail'");
+        return email;
     }
 
     public String getAddress() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAddress'");
+        return address;
     }
 
     public String getPhone() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPhone'");
+        return phone;
     }
 
-    public void setUserId(int int1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setUserId'");
+    // Setters
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public void setUsername(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setUsername'");
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void setEmail(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setEmail'");
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public void setAddress(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setAddress'");
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setPhone(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setPhone'");
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public int getUserId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getUserId'");
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
-
-    // Add all getters and setters here
-    // ...
 }

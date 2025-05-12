@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import model.User;
 import model.Product;
@@ -48,6 +49,7 @@ public class MainApp {
                 System.exit(0);
             default:
                 System.out.println("Invalid choice. Please try again.");
+                break;
         }
     }
 
@@ -153,7 +155,7 @@ public class MainApp {
             scanner.nextLine(); // consume newline
 
             Product product = productDAO.getProductById(productId);
-            if (product != null && product.getQuantity() != null && ((Integer) product.getQuantity()) >= quantity) {
+            if (product != null && Objects.nonNull(product.getQuantity()) && ((Integer) product.getQuantity()) >= quantity) {
                 boolean success = cartDAO.addToCart(currentUser.getUserId(), productId, quantity);
                 if (success) {
                     System.out.println("Product added to cart successfully!");
@@ -224,36 +226,51 @@ public class MainApp {
             return;
         }
 
-        // Calculate total
-        double total = cartItems.stream().mapToDouble(CartItem::getTotalPrice).sum();
+        // Filter out unavailable products
+        List<CartItem> availableItems = new java.util.ArrayList<>();
+        for (CartItem item : cartItems) {
+            Product product = productDAO.getProductById(item.getProductId());
+            if (product == null || Objects.isNull(product.getQuantity()) || product.getQuantity() < item.getQuantity()) {
+                System.out.println("Product '" + item.getProductName() + "' is no longer available and has been removed from your cart.");
+                cartDAO.removeFromCart(item.getCartId());
+            } else {
+                availableItems.add(item);
+            }
+        }
 
-        // Create order
-        int orderId = orderDAO.createOrder(currentUser.getUserId(), total);
+        if (availableItems.isEmpty()) {
+            System.out.println("No valid items in your cart to place an order.");
+            return;
+        }
+
+        // Calculate total
+        double total = availableItems.stream().mapToDouble(CartItem::getTotalPrice).sum();
+
+        // Convert CartItems to OrderItems
+        List<OrderItem> orderItems = new java.util.ArrayList<>();
+        for (CartItem item : availableItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProductId(item.getProductId());
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setPrice(item.getPrice());
+            orderItems.add(orderItem);
+        }
+
+        // Use transactional order creation method
+        int orderId = orderDAO.createOrderWithItems(currentUser.getUserId(), orderItems, total);
         if (orderId == -1) {
             System.out.println("Failed to create order.");
             return;
         }
 
-        // Add order items
-        boolean allItemsAdded = true;
-        for (CartItem item : cartItems) {
-            boolean success = orderDAO.addOrderItem(orderId, item.getProductId(), item.getQuantity(), item.getPrice());
-            if (!success) {
-                allItemsAdded = false;
-                break;
-            }
-
-            // Update product quantity
+        // Update product quantity
+        for (CartItem item : availableItems) {
             productDAO.updateProductQuantity(item.getProductId(), item.getQuantity());
         }
 
-        if (allItemsAdded) {
-            // Clear cart
-            cartDAO.clearCart(currentUser.getUserId());
-            System.out.println("Order placed successfully! Order ID: " + orderId);
-        } else {
-            System.out.println("Failed to place order. Some items couldn't be processed.");
-        }
+        // Clear cart
+        cartDAO.clearCart(currentUser.getUserId());
+        System.out.println("Order placed successfully! Order ID: " + orderId);
     }
 
     private static void viewOrders() {

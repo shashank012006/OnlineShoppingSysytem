@@ -43,7 +43,7 @@ public class ProductDAO {
             if (rs.next()) {
                 Product product = new Product();
                 product.setProductId(rs.getInt("product_id"));
-                product.setName(rs.getString("name"));
+                product.setName(rs.getString("name")); // corrected from product_name to name
                 product.setDescription(rs.getString("description"));
                 product.setPrice(rs.getDouble("price"));
                 product.setQuantity(rs.getInt("quantity"));
@@ -58,13 +58,13 @@ public class ProductDAO {
 
     public boolean updateProductQuantity(int productId, int quantity) {
         String sql = "UPDATE Products SET quantity = quantity - ? WHERE product_id = ?";
-
+    
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+    
             stmt.setInt(1, quantity);
             stmt.setInt(2, productId);
-
+    
             int rowsUpdated = stmt.executeUpdate();
             return rowsUpdated > 0;
         } catch (SQLException e) {
@@ -73,8 +73,5 @@ public class ProductDAO {
         }
     }
 
-    public void updateProductQuantity(int productId, Object quantity) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateProductQuantity'");
-    }
 }
+

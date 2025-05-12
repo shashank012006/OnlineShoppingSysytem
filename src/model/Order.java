@@ -1,54 +1,58 @@
 package model;
 
-import java.sql.Timestamp; // Add this import
+import java.sql.Timestamp;
+
 
 public class Order {
-    // private int orderId;
-    // private int userId;
-    // private Timestamp orderDate; // Now this will work
-    // ... rest of your code
-    public void setTotalAmount(double double1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setTotalAmount'");
+    private int orderId;
+    private int userId;
+    private Timestamp orderDate;
+    private double totalAmount;
+    private String status;
+
+    // Constructors
+    public Order() {
     }
 
-    public void setStatus(String string) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setStatus'");
+    // Getters
+    public int getOrderId() {
+        return orderId;
     }
 
-    public void setOrderId(int int1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setOrderId'");
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUserId(int int1) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setUserId'");
+    public Timestamp getOrderDate() {
+        return orderDate;
     }
 
-    public void setOrderDate(Timestamp timestamp) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'setOrderDate'");
+    public double getTotalAmount() {
+        return totalAmount;
     }
 
-    public Object getOrderId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getOrderId'");
+    public String getStatus() {
+        return status;
     }
 
-    public Object getOrderDate() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getOrderDate'");
+    // Setters
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 
-    public Object getTotalAmount() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTotalAmount'");
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
-    public Object getStatus() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStatus'");
+    public void setOrderDate(Timestamp orderDate) {
+        this.orderDate = orderDate;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

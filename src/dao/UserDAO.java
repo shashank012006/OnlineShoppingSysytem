@@ -8,10 +8,11 @@ import model.User;
 
 public class UserDAO {
     public boolean registerUser(User user) {
-        String sql = "INSERT INTO Users (username, password, email, address, phone) VALUES (?, ?, ?, ?, ?)";
+        // In registerUser method
+        String query = "INSERT INTO users(username, password, email, address, phone) VALUES(?,?,?,?,?)";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+                PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, user.getUsername());
             stmt.setString(2, user.getPassword());

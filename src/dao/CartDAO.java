@@ -7,17 +7,37 @@ import model.*; // Import all model classes
 
 public class CartDAO {
     public boolean addToCart(int userId, int productId, int quantity) {
-        String sql = "INSERT INTO Cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
+        String checkSql = "SELECT quantity FROM Cart WHERE user_id = ? AND product_id = ?";
+        String updateSql = "UPDATE Cart SET quantity = quantity + ? WHERE user_id = ? AND product_id = ?";
+        String insertSql = "INSERT INTO Cart (user_id, product_id, quantity) VALUES (?, ?, ?)";
 
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnection.getConnection()) {
+            // Check if product already in cart
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setInt(1, userId);
+                checkStmt.setInt(2, productId);
+                ResultSet rs = checkStmt.executeQuery();
 
-            stmt.setInt(1, userId);
-            stmt.setInt(2, productId);
-            stmt.setInt(3, quantity);
-
-            int rowsInserted = stmt.executeUpdate();
-            return rowsInserted > 0;
+                if (rs.next()) {
+                    // Update quantity
+                    try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
+                        updateStmt.setInt(1, quantity);
+                        updateStmt.setInt(2, userId);
+                        updateStmt.setInt(3, productId);
+                        int rowsUpdated = updateStmt.executeUpdate();
+                        return rowsUpdated > 0;
+                    }
+                } else {
+                    // Insert new row
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                        insertStmt.setInt(1, userId);
+                        insertStmt.setInt(2, productId);
+                        insertStmt.setInt(3, quantity);
+                        int rowsInserted = insertStmt.executeUpdate();
+                        return rowsInserted > 0;
+                    }
+                }
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             return false;
@@ -36,10 +56,10 @@ public class CartDAO {
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
 
-            while (rs.next()) {
+                while (rs.next()) {
                 CartItem item = new CartItem();
                 item.setCartId(rs.getInt("cart_id"));
-                item.setCartId(rs.getInt("product_id"));
+                item.setProductId(rs.getInt("product_id"));
                 item.setProductName(rs.getString("name"));
                 item.setPrice(rs.getDouble("price"));
                 item.setQuantity(rs.getInt("quantity"));

@@ -1,5 +1,6 @@
 package dao;
 
+import dao.DBConnection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,44 +9,60 @@ import model.Order;
 import model.OrderItem;
 
 public class OrderDAO {
-    public int createOrder(int userId, double totalAmount) {
-        String sql = "INSERT INTO Orders (user_id, total_amount) VALUES (?, ?)";
+
+    public int createOrderWithItems(int userId, List<OrderItem> orderItems, double totalAmount) {
+        String orderSql = "INSERT INTO Orders (user_id, total_amount) VALUES (?, ?)";
+        String orderItemSql = "INSERT INTO OrderItems (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
         int orderId = -1;
 
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
 
-            stmt.setInt(1, userId);
-            stmt.setDouble(2, totalAmount);
-            stmt.executeUpdate();
+            try (PreparedStatement orderStmt = conn.prepareStatement(orderSql, Statement.RETURN_GENERATED_KEYS)) {
+                orderStmt.setInt(1, userId);
+                orderStmt.setDouble(2, totalAmount);
+                int affectedRows = orderStmt.executeUpdate();
 
-            ResultSet rs = stmt.getGeneratedKeys();
-            if (rs.next()) {
-                orderId = rs.getInt(1);
+                if (affectedRows == 0) {
+                    conn.rollback();
+                    return -1;
+                }
+
+                try (ResultSet generatedKeys = orderStmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        orderId = generatedKeys.getInt(1);
+                    } else {
+                        conn.rollback();
+                        return -1;
+                    }
+                }
             }
+
+            try (PreparedStatement orderItemStmt = conn.prepareStatement(orderItemSql)) {
+                for (OrderItem item : orderItems) {
+                    orderItemStmt.setInt(1, orderId);
+                    orderItemStmt.setInt(2, item.getProductId());
+                    orderItemStmt.setInt(3, item.getQuantity());
+                    orderItemStmt.setDouble(4, item.getPrice());
+                    orderItemStmt.addBatch();
+                }
+                int[] results = orderItemStmt.executeBatch();
+
+                for (int res : results) {
+                    if (res == Statement.EXECUTE_FAILED) {
+                        conn.rollback();
+                        return -1;
+                    }
+                }
+            }
+
+            conn.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+            return -1;
         }
+
         return orderId;
-    }
-
-    public boolean addOrderItem(int orderId, int productId, Object quantity, Object price) {
-        String sql = "INSERT INTO OrderItems (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)";
-
-        try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, orderId);
-            stmt.setInt(2, productId);
-            stmt.setInt(3, (int) quantity);
-            stmt.setDouble(4, (double) price);
-
-            int rowsInserted = stmt.executeUpdate();
-            return rowsInserted > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 
     public List<Order> getUserOrders(int userId) {
@@ -53,7 +70,7 @@ public class OrderDAO {
         String sql = "SELECT * FROM Orders WHERE user_id = ? ORDER BY order_date DESC";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, userId);
             ResultSet rs = stmt.executeQuery();
@@ -73,15 +90,15 @@ public class OrderDAO {
         return orders;
     }
 
-    public List<OrderItem> getOrderItems(Object orderId) {
+    public List<OrderItem> getOrderItems(int orderId) {
         List<OrderItem> orderItems = new ArrayList<>();
         String sql = "SELECT oi.*, p.name FROM OrderItems oi JOIN Products p ON oi.product_id = p.product_id " +
-                "WHERE oi.order_id = ?";
+                     "WHERE oi.order_id = ?";
 
         try (Connection conn = DBConnection.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setInt(1, (int) orderId);
+            stmt.setInt(1, orderId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -98,11 +115,5 @@ public class OrderDAO {
             e.printStackTrace();
         }
         return orderItems;
-    }
-
-    // Keep only one version
-    public boolean addOrderItem(int orderId, int productId, int quantity, double price) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'addOrderItem'");
     }
 }

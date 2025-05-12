@@ -1,9 +1,17 @@
 {
     "java.project.referencedLibraries": [
-        "lib/mysql-connector-java-8.0.28.jar",
+        "lib/mysql-connector-j-9.3.0.jar",
         "test-lib/**/*.jar"
     ],
     "cSpell.words": [
-        "jdbc"
+        "jdbc",
+        "mysql"
+    ],
+    "java.configuration.runtimes": [
+        {
+            "name": "JavaSE-17",
+            "path": "/path/to/jdk-17",
+            "default": true
+        }
     ]
 }
